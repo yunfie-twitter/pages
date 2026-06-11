@@ -1,77 +1,33 @@
 ---
-import CookieBanner from "../../components/CookieBanner.astro";
-import Footer from "../../components/Footer.astro";
-import GoogleHead from "../../components/GoogleHead.astro";
-import Header from "../../components/Header.astro";
-import Loader from "../../components/Loader.astro";
 import { render } from "astro:content";
-import { formatPostDate, getBlogPosts } from "../../data/posts";
+import ArticleShell from "../../components/ArticleShell.astro";
+import PageLayout from "../../components/PageLayout.astro";
+import { getBlogPosts } from "../../data/posts";
 import { withBase } from "../../utils/paths";
-import "../../styles/global.css";
 
 export const getStaticPaths = async () => {
   const posts = await getBlogPosts();
 
-  return (
-  posts.map((post) => ({
+  return posts.map((post) => ({
     params: { slug: post.id },
     props: { post }
-  }))
-  );
+  }));
 };
 
 const { post } = Astro.props;
 const { Content } = await render(post);
 ---
 
-<!doctype html>
-<html lang="ja">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{post.data.title} | yunfie</title>
-    <meta name="description" content={post.data.description} />
-    <GoogleHead />
-    <script src={withBase("/scripts/site.js")} defer></script>
-  </head>
-
-  <body>
-    <Loader />
-    <Header homeHref="/" />
-
-    <main class="article-page">
-      <article class="article">
-        <div class="article-inner">
-          <header class="article-header">
-            <div class="article-meta">
-              <a class="article-back" href={withBase("/blog/")}>BLOG</a>
-              <time datetime={post.data.date}>{formatPostDate(post.data.date)}</time>
-            </div>
-
-            <p class="article-label">Migration Note</p>
-            <h1>{post.data.title}</h1>
-            {
-              post.data.thumbnail && (
-                <img
-                  class="article-thumbnail"
-                  src={post.data.thumbnail}
-                  alt=""
-                  loading="eager"
-                  decoding="async"
-                />
-              )
-            }
-            <p class="article-lead">{post.data.description}</p>
-          </header>
-
-          <div class="article-body">
-            <Content />
-          </div>
-        </div>
-      </article>
-    </main>
-
-    <Footer />
-    <CookieBanner />
-  </body>
-</html>
+<PageLayout title={`${post.data.title} | yunfie`} description={post.data.description} homeHref="/">
+  <ArticleShell
+    backHref={withBase("/blog/")}
+    backLabel="BLOG"
+    date={post.data.date}
+    label="Migration Note"
+    title={post.data.title}
+    lead={post.data.description}
+    thumbnail={post.data.thumbnail}
+  >
+    <Content />
+  </ArticleShell>
+</PageLayout>

@@ -2,7 +2,7 @@
 title: "静的ホームページをAstroへ移行した理由と手順"
 date: "2026-06-10"
 description: "HTML/CSS/JavaScriptで作った静的ホームページをAstroへ移行した理由、ReactやNuxt.jsを使わなかった理由、Markdownブログ化の流れをまとめます。"
-thumbnail: "https://i0.wp.com/css-tricks.com/wp-content/uploads/2021/05/astro-homepage.png?fit=2396%2C1192&ssl=1"
+thumbnail: "https://proxy.pjsekai.world/image.webp?url=https://i0.wp.com/css-tricks.com/wp-content/uploads/2021/05/astro-homepage.png?fit=2396%2C1192&ssl=1"
 ---
 
 HTML/CSS/JavaScriptで作っていた静的ホームページを、Astro構成へ移行しました。

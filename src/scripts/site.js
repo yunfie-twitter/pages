@@ -1,13 +1,34 @@
+import Lenis from "lenis";
+
 const menuButton = document.getElementById("menuButton");
 const navMenu = document.getElementById("navMenu");
 const topButton = document.getElementById("topButton");
 const hero = document.getElementById("home");
 const about = document.getElementById("about");
 const header = document.querySelector(".header");
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 let isPageJumping = false;
 let touchStartY = 0;
-let pageJumpFrame = 0;
+let pageJumpTimer = 0;
+
+const lenis = prefersReducedMotion
+  ? null
+  : new Lenis({
+      duration: 1.05,
+      easing: (time) => 1 - Math.pow(1 - time, 4),
+      smoothWheel: true,
+      syncTouch: false
+    });
+
+if (lenis) {
+  const raf = (time) => {
+    lenis.raf(time);
+    requestAnimationFrame(raf);
+  };
+
+  requestAnimationFrame(raf);
+}
 
 const loader = document.querySelector(".loader");
 
@@ -43,25 +64,79 @@ menuButton?.addEventListener("click", () => {
   setMenuOpen(navMenu?.classList.contains("active") ?? false);
 });
 
+const updateTopButton = () => {
+  if (window.scrollY > 400) {
+    topButton?.classList.add("show");
+  } else {
+    topButton?.classList.remove("show");
+  }
+};
+
 document.querySelectorAll(".nav a").forEach((link) => {
   link.addEventListener("click", () => {
     setMenuOpen(false);
   });
 });
 
-window.addEventListener("scroll", () => {
-  if (window.scrollY > 400) {
-    topButton?.classList.add("show");
-  } else {
-    topButton?.classList.remove("show");
+lenis?.on("scroll", updateTopButton);
+window.addEventListener("scroll", updateTopButton);
+
+const scrollToY = (targetY, options = {}) => {
+  const { duration = 0.72, lock = false, onComplete } = options;
+
+  if (lenis) {
+    lenis.scrollTo(targetY, {
+      duration,
+      lock,
+      onComplete
+    });
+    return;
   }
+
+  window.scrollTo({
+    top: targetY,
+    behavior: prefersReducedMotion ? "auto" : "smooth"
+  });
+  onComplete?.();
+};
+
+const getElementFromHash = (hash) => {
+  if (!hash || hash === "#") {
+    return null;
+  }
+
+  const id = decodeURIComponent(hash.slice(1));
+  return document.getElementById(id);
+};
+
+const scrollToElement = (target) => {
+  const headerHeight = header?.getBoundingClientRect().height ?? 0;
+  const targetTop = target.getBoundingClientRect().top + window.scrollY;
+  scrollToY(Math.max(targetTop - headerHeight, 0));
+};
+
+document.querySelectorAll('a[href*="#"]:not([target="_blank"])').forEach((link) => {
+  link.addEventListener("click", (event) => {
+    const url = new URL(link.href, window.location.href);
+
+    if (url.origin !== window.location.origin || url.pathname !== window.location.pathname) {
+      return;
+    }
+
+    const target = getElementFromHash(url.hash);
+
+    if (!target) {
+      return;
+    }
+
+    event.preventDefault();
+    setMenuOpen(false);
+    scrollToElement(target);
+  });
 });
 
 topButton?.addEventListener("click", () => {
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
+  scrollToY(0);
 });
 
 const getAboutTop = () => {
@@ -86,44 +161,27 @@ const animatePageScroll = (targetY) => {
     return;
   }
 
-  const startY = window.scrollY;
-  const distance = targetY - startY;
-
-  if (Math.abs(distance) <= 8) {
+  if (Math.abs(targetY - window.scrollY) <= 8) {
     return;
   }
 
-  const duration = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ? 0
-    : 460;
-  const startedAt = performance.now();
-  const root = document.documentElement;
-  const previousScrollBehavior = root.style.scrollBehavior;
-
   isPageJumping = true;
   document.body.classList.add("is-page-jumping");
-  root.style.scrollBehavior = "auto";
 
-  cancelAnimationFrame(pageJumpFrame);
-
-  const animate = (now) => {
-    const progress = duration === 0 ? 1 : Math.min((now - startedAt) / duration, 1);
-    const eased = 1 - Math.pow(1 - progress, 4);
-
-    window.scrollTo(0, startY + distance * eased);
-
-    if (progress < 1) {
-      pageJumpFrame = requestAnimationFrame(animate);
-      return;
-    }
-
-    window.scrollTo(0, targetY);
-    root.style.scrollBehavior = previousScrollBehavior;
+  const completePageJump = () => {
+    window.clearTimeout(pageJumpTimer);
     isPageJumping = false;
     document.body.classList.remove("is-page-jumping");
   };
 
-  pageJumpFrame = requestAnimationFrame(animate);
+  window.clearTimeout(pageJumpTimer);
+  pageJumpTimer = window.setTimeout(completePageJump, prefersReducedMotion ? 0 : 900);
+
+  scrollToY(targetY, {
+    duration: prefersReducedMotion ? 0 : 0.46,
+    lock: true,
+    onComplete: completePageJump
+  });
 };
 
 const jumpToAbout = () => {
@@ -235,6 +293,8 @@ extModal?.addEventListener("keydown", (e) => {
 
 document.querySelectorAll('a[target="_blank"]').forEach((link) => {
   link.addEventListener("click", (e) => {
+    if (link.id === "extModalGo") return;
+
     const url = link.getAttribute("href");
     if (!url || url === "#") return;
     e.preventDefault();
@@ -329,6 +389,13 @@ const applyConsent = (granted) => {
 
 const hideBanner = () => {
   if (cookieBanner) cookieBanner.hidden = true;
+  document.body.classList.remove("has-cookie-banner");
+};
+
+const showCookieBanner = () => {
+  if (!cookieBanner) return;
+  cookieBanner.hidden = false;
+  document.body.classList.add("has-cookie-banner");
 };
 
 const savedConsent = localStorage.getItem(COOKIE_KEY);
@@ -340,7 +407,7 @@ if (savedConsent === null) {
 
     if (!hero) {
       // Heroがないページ（ブログ等）はローダー完了後すぐに表示
-      cookieBanner.hidden = false;
+      showCookieBanner();
       return;
     }
 
@@ -348,7 +415,7 @@ if (savedConsent === null) {
       (entries) => {
         const heroVisible = entries[0]?.isIntersecting ?? true;
         if (!heroVisible) {
-          cookieBanner.hidden = false;
+          showCookieBanner();
           observer.disconnect();
         }
       },

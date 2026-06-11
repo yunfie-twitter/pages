@@ -2491,6 +2491,10 @@ a {
   display: block;
 }
 
+.has-cookie-banner .top-button {
+  bottom: 112px;
+}
+
 .is-page-jumping .hero-content {
   transform: translateY(-18px);
   opacity: 0.86;
@@ -3312,5 +3316,9 @@ a {
   .top-button {
     right: 16px;
     bottom: 16px;
+  }
+
+  .has-cookie-banner .top-button {
+    bottom: 178px;
   }
 }

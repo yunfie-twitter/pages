@@ -1,0 +1,45 @@
+---
+type Props = {
+  backHref: string;
+  backLabel: string;
+  date: string;
+  label: string;
+  title: string;
+  lead: string;
+  thumbnail?: string;
+};
+
+const { backHref, backLabel, date, label, title, lead, thumbnail } = Astro.props;
+---
+
+<main class="article-page">
+  <article class="article">
+    <div class="article-inner">
+      <header class="article-header">
+        <div class="article-meta">
+          <a class="article-back" href={backHref}>{backLabel}</a>
+          <time datetime={date}>{date.replaceAll("-", ".")}</time>
+        </div>
+
+        <p class="article-label">{label}</p>
+        <h1>{title}</h1>
+        {
+          thumbnail && (
+            <img
+              class="article-thumbnail"
+              src={thumbnail}
+              alt=""
+              loading="eager"
+              decoding="async"
+            />
+          )
+        }
+        <p class="article-lead">{lead}</p>
+      </header>
+
+      <div class="article-body">
+        <slot />
+      </div>
+    </div>
+  </article>
+</main>

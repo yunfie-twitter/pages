@@ -1,0 +1,61 @@
+---
+import { featuredLinkNames, type ProfileLink, profileLinks } from "../data/links";
+
+const featuredLinks = featuredLinkNames
+  .map((name) => profileLinks.find((link) => link.name === name))
+  .filter((link): link is ProfileLink => Boolean(link));
+const moreLinks = profileLinks.filter((link) => !featuredLinkNames.includes(link.name));
+---
+
+<section id="links" class="section">
+  <h2>LINKS</h2>
+
+  <p>ゆんふぃの公式・関連リンクです。</p>
+
+  <div class="link-grid">
+    {
+      featuredLinks.map((link) => (
+        <a
+          class="link-card"
+          href={link.url}
+          target="_blank"
+          rel="noopener noreferrer me"
+          aria-label={link.label}
+          style={`--accent: ${link.accent};`}
+        >
+          <span class="link-mark" aria-hidden="true">
+            <img src={link.icon} alt="" loading="lazy" width="28" height="28" />
+          </span>
+          <span class="link-name">{link.name}</span>
+          <small class="link-kind">{link.kind}</small>
+          <small class="link-url">{link.text}</small>
+        </a>
+      ))
+    }
+
+    {
+      moreLinks.map((link) => (
+        <a
+          class="link-card link-card-more"
+          href={link.url}
+          target="_blank"
+          rel="noopener noreferrer me"
+          aria-label={link.label}
+          style={`--accent: ${link.accent};`}
+          hidden
+        >
+          <span class="link-mark" aria-hidden="true">
+            <img src={link.icon} alt="" loading="lazy" width="28" height="28" />
+          </span>
+          <span class="link-name">{link.name}</span>
+          <small class="link-kind">{link.kind}</small>
+          <small class="link-url">{link.text}</small>
+        </a>
+      ))
+    }
+  </div>
+
+  <button id="toggleLinks" class="button links-toggle" type="button" aria-expanded="false">
+    続きを表示
+  </button>
+</section>
