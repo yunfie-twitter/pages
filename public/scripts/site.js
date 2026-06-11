@@ -1,0 +1,362 @@
+const menuButton = document.getElementById("menuButton");
+const navMenu = document.getElementById("navMenu");
+const topButton = document.getElementById("topButton");
+const hero = document.getElementById("home");
+const about = document.getElementById("about");
+const header = document.querySelector(".header");
+
+let isPageJumping = false;
+let touchStartY = 0;
+let pageJumpFrame = 0;
+
+const loader = document.querySelector(".loader");
+
+const finishLoading = () => {
+  window.setTimeout(() => {
+    // まずロゴをフェードアウト、少し遅れてパネルを開く
+    loader?.classList.add("is-out");
+    document.body.classList.add("is-loaded");
+    window.setTimeout(() => {
+      loader?.remove();
+    }, 1200);
+  }, 1100);
+};
+
+if (document.readyState === "complete") {
+  finishLoading();
+} else {
+  window.addEventListener("load", finishLoading, { once: true });
+}
+
+const setMenuOpen = (isOpen) => {
+  navMenu?.classList.toggle("active", isOpen);
+
+  if (menuButton) {
+    menuButton.classList.toggle("is-open", isOpen);
+    menuButton.setAttribute("aria-expanded", String(isOpen));
+    menuButton.setAttribute("aria-label", isOpen ? "メニューを閉じる" : "メニューを開く");
+  }
+};
+
+menuButton?.addEventListener("click", () => {
+  navMenu?.classList.toggle("active");
+  setMenuOpen(navMenu?.classList.contains("active") ?? false);
+});
+
+document.querySelectorAll(".nav a").forEach((link) => {
+  link.addEventListener("click", () => {
+    setMenuOpen(false);
+  });
+});
+
+window.addEventListener("scroll", () => {
+  if (window.scrollY > 400) {
+    topButton?.classList.add("show");
+  } else {
+    topButton?.classList.remove("show");
+  }
+});
+
+topButton?.addEventListener("click", () => {
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+});
+
+const getAboutTop = () => {
+  const headerHeight = header?.getBoundingClientRect().height ?? 0;
+  const aboutTop = about?.offsetTop ?? 0;
+
+  return Math.max(aboutTop - headerHeight, 0);
+};
+
+const isAtHeroStart = () => Boolean(hero && about && window.scrollY <= 2);
+
+const isAtAboutStart = () => {
+  if (!hero || !about) {
+    return false;
+  }
+
+  return Math.abs(window.scrollY - getAboutTop()) <= 18;
+};
+
+const animatePageScroll = (targetY) => {
+  if (isPageJumping) {
+    return;
+  }
+
+  const startY = window.scrollY;
+  const distance = targetY - startY;
+
+  if (Math.abs(distance) <= 8) {
+    return;
+  }
+
+  const duration = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ? 0
+    : 460;
+  const startedAt = performance.now();
+  const root = document.documentElement;
+  const previousScrollBehavior = root.style.scrollBehavior;
+
+  isPageJumping = true;
+  document.body.classList.add("is-page-jumping");
+  root.style.scrollBehavior = "auto";
+
+  cancelAnimationFrame(pageJumpFrame);
+
+  const animate = (now) => {
+    const progress = duration === 0 ? 1 : Math.min((now - startedAt) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 4);
+
+    window.scrollTo(0, startY + distance * eased);
+
+    if (progress < 1) {
+      pageJumpFrame = requestAnimationFrame(animate);
+      return;
+    }
+
+    window.scrollTo(0, targetY);
+    root.style.scrollBehavior = previousScrollBehavior;
+    isPageJumping = false;
+    document.body.classList.remove("is-page-jumping");
+  };
+
+  pageJumpFrame = requestAnimationFrame(animate);
+};
+
+const jumpToAbout = () => {
+  if (!about || !isAtHeroStart()) {
+    return;
+  }
+
+  animatePageScroll(getAboutTop());
+};
+
+const jumpToHero = () => {
+  if (!hero || !isAtAboutStart()) {
+    return;
+  }
+
+  animatePageScroll(0);
+};
+
+window.addEventListener(
+  "wheel",
+  (event) => {
+    if (isPageJumping) {
+      event.preventDefault();
+      return;
+    }
+
+    if (Math.abs(event.deltaY) < 8) {
+      return;
+    }
+
+    if (event.deltaY > 0 && isAtHeroStart()) {
+      event.preventDefault();
+      jumpToAbout();
+    }
+
+    if (event.deltaY < 0 && isAtAboutStart()) {
+      event.preventDefault();
+      jumpToHero();
+    }
+  },
+  { passive: false }
+);
+
+window.addEventListener(
+  "touchstart",
+  (event) => {
+    touchStartY = event.touches[0]?.clientY ?? 0;
+  },
+  { passive: true }
+);
+
+window.addEventListener(
+  "touchmove",
+  (event) => {
+    if (isPageJumping) {
+      event.preventDefault();
+      return;
+    }
+
+    const touchY = event.touches[0]?.clientY ?? touchStartY;
+    const swipeDistance = touchStartY - touchY;
+
+    if (Math.abs(swipeDistance) < 36) {
+      return;
+    }
+
+    if (swipeDistance > 0 && isAtHeroStart()) {
+      event.preventDefault();
+      jumpToAbout();
+    }
+
+    if (swipeDistance < 0 && isAtAboutStart()) {
+      event.preventDefault();
+      jumpToHero();
+    }
+  },
+  { passive: false }
+);
+
+// =========================
+// External Link Modal
+// =========================
+
+const extModal = document.getElementById("externalModal");
+const extModalUrl = document.getElementById("extModalUrl");
+const extModalGo = document.getElementById("extModalGo");
+const extModalCancel = document.getElementById("extModalCancel");
+const extModalBackdrop = extModal?.querySelector(".ext-modal-backdrop");
+
+const openExtModal = (url) => {
+  if (!extModal || !extModalUrl || !extModalGo) return;
+  extModalUrl.textContent = url;
+  extModalGo.href = url;
+  extModal.hidden = false;
+  extModalCancel?.focus();
+};
+
+const closeExtModal = () => {
+  if (!extModal) return;
+  extModal.hidden = true;
+};
+
+extModalCancel?.addEventListener("click", closeExtModal);
+extModalBackdrop?.addEventListener("click", closeExtModal);
+
+extModal?.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeExtModal();
+});
+
+document.querySelectorAll('a[target="_blank"]').forEach((link) => {
+  link.addEventListener("click", (e) => {
+    const url = link.getAttribute("href");
+    if (!url || url === "#") return;
+    e.preventDefault();
+    openExtModal(url);
+  });
+});
+
+// =========================
+// Links Toggle
+// =========================
+
+const toggleLinks = document.getElementById("toggleLinks");
+const moreLinkCards = document.querySelectorAll(".link-card-more");
+
+toggleLinks?.addEventListener("click", () => {
+  const isExpanded = toggleLinks.getAttribute("aria-expanded") === "true";
+
+  moreLinkCards.forEach((card) => {
+    card.hidden = isExpanded;
+  });
+
+  toggleLinks.setAttribute("aria-expanded", String(!isExpanded));
+  toggleLinks.textContent = isExpanded ? "続きを表示" : "閉じる";
+});
+
+// =========================
+// Contact Form
+// =========================
+
+const contactForm = document.getElementById("contactForm");
+
+contactForm?.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const formData = new FormData(contactForm);
+  const name = String(formData.get("name") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim();
+  const subject = String(formData.get("subject") ?? "").trim();
+  const message = String(formData.get("message") ?? "").trim();
+
+  const body = [
+    name ? `お名前: ${name}` : "",
+    email ? `返信先: ${email}` : "",
+    "",
+    message
+  ]
+    .filter((line, index) => line || index === 2)
+    .join("\n");
+
+  const mailto = new URL("mailto:yunfie168@proton.me");
+  mailto.searchParams.set("subject", subject || "お問い合わせ");
+  mailto.searchParams.set("body", body);
+
+  window.location.href = mailto.toString();
+});
+
+// =========================
+// Cookie Consent Banner
+// =========================
+
+const COOKIE_KEY = "yunfie_cookie_consent";
+const cookieBanner = document.getElementById("cookieBanner");
+const cookieAccept = document.getElementById("cookieAccept");
+const cookieDeny = document.getElementById("cookieDeny");
+
+const enableAnalytics = () => {
+  if (typeof gtag === "function") {
+    gtag("consent", "update", { analytics_storage: "granted" });
+    gtag("event", "page_view");
+  }
+};
+
+const applyConsent = (granted) => {
+  if (granted) enableAnalytics();
+};
+
+const hideBanner = () => {
+  if (cookieBanner) cookieBanner.hidden = true;
+};
+
+const savedConsent = localStorage.getItem(COOKIE_KEY);
+
+if (savedConsent === null) {
+  // 未選択 — ファーストビュー（Hero）を離れてからバナーを表示
+  const showBannerWhenReady = () => {
+    if (!cookieBanner) return;
+
+    if (!hero) {
+      // Heroがないページ（ブログ等）はローダー完了後すぐに表示
+      cookieBanner.hidden = false;
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const heroVisible = entries[0]?.isIntersecting ?? true;
+        if (!heroVisible) {
+          cookieBanner.hidden = false;
+          observer.disconnect();
+        }
+      },
+      { threshold: 0 }
+    );
+
+    observer.observe(hero);
+  };
+
+  // ローダー完了後に監視を開始
+  window.addEventListener("load", () => {
+    setTimeout(showBannerWhenReady, 1600);
+  });
+} else {
+  applyConsent(savedConsent === "granted");
+}
+
+cookieAccept?.addEventListener("click", () => {
+  localStorage.setItem(COOKIE_KEY, "granted");
+  applyConsent(true);
+  hideBanner();
+});
+
+cookieDeny?.addEventListener("click", () => {
+  localStorage.setItem(COOKIE_KEY, "denied");
+  hideBanner();
+});

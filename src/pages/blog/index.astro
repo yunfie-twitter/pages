@@ -1,0 +1,85 @@
+---
+import CookieBanner from "../../components/CookieBanner.astro";
+import Footer from "../../components/Footer.astro";
+import Header from "../../components/Header.astro";
+import Loader from "../../components/Loader.astro";
+import { formatPostDate, getBlogPosts, getPostHref } from "../../data/posts";
+import "../../styles/global.css";
+
+const posts = await getBlogPosts();
+const latestPost = posts[0];
+const latestDate = latestPost ? formatPostDate(latestPost.data.date) : "----.--.--";
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blog | yunfie</title>
+    <meta name="description" content="yunfieのブログです。" />
+    <script src="/scripts/site.js" defer></script>
+  </head>
+
+  <body>
+    <Loader />
+    <Header homeHref="/" />
+
+    <main class="blog-page">
+      <section class="blog-hero page-hero">
+        <div class="blog-hero-copy">
+          <p class="hero-kicker">Journal / Field Notes</p>
+          <h1>Blog</h1>
+          <p>更新情報、制作メモ、日々の記録を、あとから読み返せる形で置いています。</p>
+        </div>
+
+        <aside class="blog-hero-card" aria-label="ブログ概要">
+          <img
+            src="https://yt3.googleusercontent.com/sLRN8C_Bqv9bSaBZ-dX61Wlkjj6Zl92_EBfPNrSQA7XVU0_YuLOaZA-vF2P-1X1d6tcSplJtCA=s900-c-k-c0x00ffffff-no-rj"
+            alt="ゆんふぃのアイコン"
+            width="112"
+            height="112"
+          />
+          <dl>
+            <div>
+              <dt>Posts</dt>
+              <dd>{posts.length.toString().padStart(2, "0")}</dd>
+            </div>
+            <div>
+              <dt>Latest</dt>
+              <dd>{latestDate}</dd>
+            </div>
+          </dl>
+        </aside>
+      </section>
+
+      <section class="blog-index section" aria-label="記事一覧">
+        <div class="blog-index-head">
+          <p class="blog-index-label">Archive</p>
+          <p>書いたこと、直したこと、気づいたこと。</p>
+        </div>
+
+        <div class="blog-list">
+          {
+            posts.map((post, index) => (
+              <a class="blog-post" href={getPostHref(post.id)} style={`--post-index: '${String(index + 1).padStart(2, "0")}';`}>
+                <span class="blog-post-meta">
+                  <time datetime={post.data.date}>{formatPostDate(post.data.date)}</time>
+                  <span>Note</span>
+                </span>
+                <span class="blog-post-body">
+                  <h2>{post.data.title}</h2>
+                  <p>{post.data.description}</p>
+                </span>
+                <span class="blog-post-arrow" aria-hidden="true">→</span>
+              </a>
+            ))
+          }
+        </div>
+      </section>
+    </main>
+
+    <Footer />
+    <CookieBanner />
+  </body>
+</html>

@@ -1,0 +1,436 @@
+---
+import CookieBanner from "../components/CookieBanner.astro";
+import Footer from "../components/Footer.astro";
+import Header from "../components/Header.astro";
+import Hero from "../components/Hero.astro";
+import Loader from "../components/Loader.astro";
+import { formatPostDate, getBlogPosts, getPostHref } from "../data/posts";
+import { tracks, getYoutubeThumbnail, getYoutubeHref } from "../data/tracks";
+import "../styles/global.css";
+
+const posts = await getBlogPosts();
+const siteUrl = Astro.site ?? new URL("https://example.com");
+const canonicalUrl = new URL("/", siteUrl).toString();
+const ogImageUrl = new URL("/ogp.png", siteUrl).toString();
+
+const links = [
+  {
+    name: "Ko-fi",
+    url: "https://ko-fi.com/yunfie",
+    label: "Ko-fiを開く",
+    text: "https://ko-fi.com/yunfie",
+    kind: "Support",
+    icon: "https://cdn.simpleicons.org/kofi/ffffff",
+    accent: "#ff5f5f"
+  },
+  {
+    name: "YouTube",
+    url: "https://www.youtube.com/@yunfie_twitter_dayo",
+    label: "YouTubeを開く",
+    text: "https://www.youtube.com/@yunfie_twitter_dayo",
+    kind: "Video",
+    icon: "https://cdn.simpleicons.org/youtube/ffffff",
+    accent: "#e62117"
+  },
+  {
+    name: "GitHub",
+    url: "https://github.com/yunfie-twitter",
+    label: "GitHubを開く",
+    text: "https://github.com/yunfie-twitter",
+    kind: "Code",
+    icon: "https://cdn.simpleicons.org/github/ffffff",
+    accent: "#24292f"
+  },
+  {
+    name: "misskey.io",
+    url: "https://misskey.io/@yunfie_noc",
+    label: "Misskey misskey.ioを開く",
+    text: "https://misskey.io/@yunfie_noc",
+    kind: "Social",
+    icon: "https://cdn.simpleicons.org/misskey/ffffff",
+    accent: "#86b300"
+  },
+  {
+    name: "note",
+    url: "https://note.com/yunfie_twitter",
+    label: "noteを開く",
+    text: "https://note.com/yunfie_twitter",
+    kind: "Writing",
+    icon: "https://cdn.simpleicons.org/note/ffffff",
+    accent: "#41c9b4"
+  },
+  {
+    name: "Wikipedia",
+    url: "https://ja.wikipedia.org/wiki/%E5%88%A9%E7%94%A8%E8%80%85:%E3%82%86%E3%82%93%E3%81%B5%E3%81%83",
+    label: "Wikipedia利用者ページを開く",
+    text: "ja.wikipedia.org/wiki/利用者:ゆんふぃ",
+    kind: "Profile",
+    icon: "https://cdn.simpleicons.org/wikipedia/ffffff",
+    accent: "#6b7280"
+  },
+  {
+    name: "X",
+    url: "https://x.com/yunfie_misskey",
+    label: "Xを開く",
+    text: "https://x.com/yunfie_misskey",
+    kind: "Social",
+    icon: "https://cdn.simpleicons.org/x/ffffff",
+    accent: "#111111"
+  },
+  {
+    name: "Instagram",
+    url: "https://www.instagram.com/yunfie168/",
+    label: "Instagramを開く",
+    text: "https://www.instagram.com/yunfie168/",
+    kind: "Photo",
+    icon: "https://cdn.simpleicons.org/instagram/ffffff",
+    accent: "#d9468d"
+  }
+];
+
+const featuredLinkNames = ["YouTube", "X", "misskey.io", "GitHub"];
+const featuredLinks = featuredLinkNames
+  .map((name) => links.find((link) => link.name === name))
+  .filter(Boolean);
+const moreLinks = links.filter((link) => !featuredLinkNames.includes(link.name));
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "ゆんふぃ",
+  alternateName: ["Yunfie", "yunfie"],
+  url: canonicalUrl,
+  sameAs: links.map((link) => link.url),
+  description:
+    "ゆんふぃの公式ホームページです。各種SNS・制作活動・投稿サイトへのリンクをまとめています。"
+};
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>ゆんふぃ | Official Website</title>
+    <meta
+      name="description"
+      content="ゆんふぃの公式ホームページです。YouTube、GitHub、Ko-fi、note、X、Instagram、Misskeyなどの活動リンクをまとめています。"
+    />
+    <meta name="author" content="ゆんふぃ" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#ffffff" />
+
+    <link rel="canonical" href={canonicalUrl} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ゆんふぃ Official Website" />
+    <meta property="og:title" content="ゆんふぃ | Official Website" />
+    <meta
+      property="og:description"
+      content="ゆんふぃの各種SNS・制作活動・投稿サイトへのリンクをまとめた公式ホームページです。"
+    />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:locale" content="ja_JP" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="ゆんふぃ | Official Website" />
+    <meta
+      name="twitter:description"
+      content="ゆんふぃのYouTube、GitHub、Ko-fi、note、X、Instagramなどをまとめたホームページです。"
+    />
+    <meta name="twitter:image" content={ogImageUrl} />
+    <meta name="twitter:site" content="@yunfie_misskey" />
+    <meta name="twitter:creator" content="@yunfie_misskey" />
+
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+    <!-- Google tag (gtag.js) — 同意後のみ計測を開始 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-678KKVFQ92"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag('js', new Date());
+      // デフォルトは拒否。同意後に update する
+      gtag('consent', 'default', {
+        analytics_storage: 'denied',
+        wait_for_update: 500,
+      });
+      gtag('config', 'G-678KKVFQ92', { send_page_view: false });
+    </script>
+
+    <script src="/scripts/site.js" defer></script>
+  </head>
+
+  <body>
+    <Loader />
+    <Header />
+
+    <main>
+      <Hero />
+
+      <section id="about" class="section">
+        <div class="about-panel">
+          <div class="about-heading">
+            <span class="about-kicker">Personal Creator</span>
+            <h2>ABOUT</h2>
+            <img
+              class="about-icon"
+              src="https://yt3.googleusercontent.com/sLRN8C_Bqv9bSaBZ-dX61Wlkjj6Zl92_EBfPNrSQA7XVU0_YuLOaZA-vF2P-1X1d6tcSplJtCA=s900-c-k-c0x00ffffff-no-rj"
+              alt="ゆんふぃのアイコン"
+              width="180"
+              height="180"
+              loading="lazy"
+            />
+          </div>
+
+          <div class="about-copy">
+            <p class="about-lead">
+              ゆんふぃです。Web・音楽・ソフトウェアなど、気になったことを調べたり、
+              作ったものを公開したりしています。
+            </p>
+
+            <p>
+              このサイトは、SNSや投稿先、制作物、更新情報をまとめておくための場所です。
+              興味の向くままに調べて、作って、試しながら、日々のアウトプットを少しずつ残しています。
+            </p>
+
+            <ul class="about-tags" aria-label="活動分野">
+              <li>Web</li>
+              <li>Music</li>
+              <li>Software</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="news" class="section">
+        <h2>NEWS</h2>
+
+        <p>ブログと更新情報です。</p>
+
+        <div class="news-grid">
+          {
+            posts.map((post) => (
+              <a class="news-card" href={getPostHref(post.id)}>
+                <small>{formatPostDate(post.data.date)}</small>
+                <span>{post.data.title}</span>
+                <p>{post.data.description}</p>
+              </a>
+            ))
+          }
+        </div>
+
+        <a class="news-all-link" href="/blog/" aria-label="すべての記事を見る">
+          すべての記事
+        </a>
+      </section>
+
+      <section id="music" class="section">
+        <h2>MUSIC</h2>
+
+        <p>ゆんふぃの公式楽曲リストです。</p>
+
+        {tracks.length > 0 ? (
+          <div class="music-grid">
+            {tracks.map((track) => (
+              <a
+                class="music-card"
+                href={getYoutubeHref(track.youtubeId)}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${track.title} を開く`}
+              >
+                <div class="music-thumb">
+                  <img
+                    src={track.thumbnail ?? getYoutubeThumbnail(track.youtubeId)}
+                    alt={track.title}
+                    loading="lazy"
+                    width="480"
+                    height="270"
+                  />
+                </div>
+                <div class="music-info">
+                  <small>{track.date}</small>
+                  <span>{track.title}</span>
+                  {track.description && <p>{track.description}</p>}
+                </div>
+              </a>
+            ))}
+          </div>
+        ) : (
+          <p class="music-empty">楽曲は準備中です。</p>
+        )}
+      </section>
+
+      <section id="repository" class="section">
+        <h2>REPOSITORY</h2>
+
+        <p>公開しているコードや制作物の置き場です。</p>
+
+        <a
+          class="repository-card"
+          href="https://github.com/yunfie-twitter/pixivfe-Fork"
+          target="_blank"
+          rel="noopener noreferrer me"
+          aria-label="yunfie-twitter/pixivfe-Forkを開く"
+        >
+          <span class="repository-preview" aria-hidden="true">
+            <img
+              src="https://opengraph.githubassets.com/e63b8a2f4236c10e5a2f1ae3c8c038da83b3b845bbb2f89e65808f820c84e0ba/yunfie-twitter/pixivfe-Fork"
+              alt=""
+              loading="lazy"
+              width="1200"
+              height="600"
+            />
+          </span>
+          <span class="repository-copy">
+            <small>GitHub</small>
+            <strong>pixivfe-Fork</strong>
+            <em>github.com/yunfie-twitter/pixivfe-Fork</em>
+          </span>
+        </a>
+
+        <a
+          class="repository-card"
+          href="https://github.com/yunfie-twitter/inverview-server.git"
+          target="_blank"
+          rel="noopener noreferrer me"
+          aria-label="yunfie-twitter/inverview-serverを開く"
+        >
+          <span class="repository-preview" aria-hidden="true">
+            <img
+              src="https://opengraph.githubassets.com/f1f65fb714b2d8f5534b0385b725b2caf0d408082c5928b2cd9689a1c4e50432/yunfie-twitter/inverview-server"
+              alt=""
+              loading="lazy"
+              width="1200"
+              height="600"
+            />
+          </span>
+          <span class="repository-copy">
+            <small>GitHub</small>
+            <strong>inverview-server</strong>
+            <em>github.com/yunfie-twitter/inverview-server.git</em>
+          </span>
+        </a>
+      </section>
+
+      <section id="links" class="section">
+        <h2>LINKS</h2>
+
+        <p>ゆんふぃの公式・関連リンクです。</p>
+
+        <div class="link-grid">
+          {
+            featuredLinks.map((link) => (
+              <a
+                class="link-card"
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer me"
+                aria-label={link.label}
+                style={`--accent: ${link.accent};`}
+              >
+                <span class="link-mark" aria-hidden="true">
+                  <img src={link.icon} alt="" loading="lazy" width="28" height="28" />
+                </span>
+                <span class="link-name">{link.name}</span>
+                <small class="link-kind">{link.kind}</small>
+                <small class="link-url">{link.text}</small>
+              </a>
+            ))
+          }
+
+          {
+            moreLinks.map((link) => (
+              <a
+                class="link-card link-card-more"
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer me"
+                aria-label={link.label}
+                style={`--accent: ${link.accent};`}
+                hidden
+              >
+                <span class="link-mark" aria-hidden="true">
+                  <img src={link.icon} alt="" loading="lazy" width="28" height="28" />
+                </span>
+                <span class="link-name">{link.name}</span>
+                <small class="link-kind">{link.kind}</small>
+                <small class="link-url">{link.text}</small>
+              </a>
+            ))
+          }
+        </div>
+
+        <button id="toggleLinks" class="button links-toggle" type="button" aria-expanded="false">
+          続きを表示
+        </button>
+      </section>
+
+      <section id="contact" class="section contact-section">
+        <div class="contact-panel">
+          <div class="contact-copy">
+            <span class="contact-label">CONTACT</span>
+            <h2>CONTACT</h2>
+
+            <p>お問い合わせやご連絡は、こちらのメールフォームからお願いします。</p>
+            <a class="contact-mail" href="mailto:yunfie168@proton.me">yunfie168@proton.me</a>
+          </div>
+
+          <form id="contactForm" class="contact-form">
+            <label>
+              <span>NAME</span>
+              <input name="name" type="text" autocomplete="name" placeholder="お名前" />
+            </label>
+
+            <label>
+              <span>EMAIL</span>
+              <input name="email" type="email" autocomplete="email" placeholder="返信先メールアドレス" />
+            </label>
+
+            <label>
+              <span>SUBJECT</span>
+              <input name="subject" type="text" placeholder="件名" required />
+            </label>
+
+            <label>
+              <span>MESSAGE</span>
+              <textarea name="message" rows="5" placeholder="お問い合わせ内容" required></textarea>
+            </label>
+
+            <button class="button contact-submit" type="submit">メールを作成する</button>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <Footer />
+
+    <button
+      id="topButton"
+      class="top-button"
+      type="button"
+      aria-label="ページ上部へ戻る"
+    >
+      ↑
+    </button>
+
+    <!-- 外部リンク確認モーダル -->
+    <div id="externalModal" class="ext-modal" role="dialog" aria-modal="true" aria-labelledby="extModalTitle" hidden>
+      <div class="ext-modal-backdrop"></div>
+      <div class="ext-modal-box">
+        <p class="ext-modal-label" id="extModalTitle">外部サイトへ移動します</p>
+        <p class="ext-modal-url" id="extModalUrl"></p>
+        <div class="ext-modal-actions">
+          <button class="button ext-modal-cancel" id="extModalCancel" type="button">キャンセル</button>
+          <a class="button ext-modal-go" id="extModalGo" href="#" target="_blank" rel="noopener noreferrer">移動する ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cookie同意バナー -->
+    <CookieBanner />
+  </body>
+</html>

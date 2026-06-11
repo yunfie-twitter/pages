@@ -1,0 +1,74 @@
+# ディレクトリ構成
+
+以下はブログMarkdown管理で使用するフォルダとその目的です。
+
+- templates/
+  - 投稿やページで共通して使うテンプレート（レイアウト、部分テンプレート、テンプレート変数）の格納。
+- posts/
+  - 実際のブログ投稿のMarkdownファイルを格納するディレクトリ。各ファイルはフロントマターを含む。
+- scripts/
+  - ビルド、デプロイ、ヘルパー用のスクリプト（例: 静的サイトジェネレータ、コンテンツ検証、画像最適化）の保存。
+- site/
+  - ビルド済みの公開用サイト（HTML/CSS/JS、生成されたアセット）を出力するディレクトリ。
+- reports/
+  - 投稿やサイトの統計、生成ログ、解析レポートなどの出力を保存するディレクトリ。
+
+
+# ファイル命名規則
+
+新規投稿ファイルのファイル名は次の形式にします:
+
+YYYY-MM-DD-slug.md
+
+- YYYY-MM-DD: 投稿の公開日（例: 2026-06-10）
+- slug: 投稿識別子（URLの一部として使用）
+
+slug の作り方（ルール）:
+
+1. すべて小文字にする。
+2. スペースはハイフン（-）に置換する。
+3. 英数字（a-z, 0-9）とハイフン（-）のみを許可する。その他の文字（句読点、記号、アクセント文字など）は削除またはASCII相当文字に置換する。
+4. 連続するハイフンは単一のハイフンにまとめる（例: "a  b" → "a-b"）。
+5. 先頭・末尾のハイフンは削除する。
+
+具体例:
+
+- タイトル: "Hello World 2026" → slug: "hello-world-2026" → ファイル名: 2026-06-10-hello-world-2026.md
+- タイトル: "New Post: Tips & Tricks" → 中間処理: remove ':' and '&' → "new post tips tricks" → slug: "new-post-tips-tricks" → ファイル名: 2026-06-10-new-post-tips-tricks.md
+- タイトル: "  Leading and Trailing  " → slug: "leading-and-trailing" → ファイル名: 2026-06-10-leading-and-trailing.md
+
+
+# フロントマター仕様
+
+投稿ファイルは先頭に YAML フロントマターを含めます。必須フィールドと型は以下のとおりです。
+
+必須 YAML フィールド:
+
+- title: string
+- date: ISO 8601 形式の日時（例: 2026-06-10T21:00:00+09:00）
+- tags: array（文字列の配列）
+- draft: boolean（true = 下書き、false = 公開）
+- slug: string（上記ルールに従った slug）
+- summary: string（概要、短い説明）
+
+サンプル:
+
+---
+title: "Example Post"
+date: 2026-06-10T21:00:00+09:00
+tags:
+  - example
+  - tutorial
+draft: false
+slug: "example-post"
+summary: "This is a short summary of the example post."
+---
+
+本文は上記フロントマターの後に続きます。
+
+
+# 備考
+
+- ファイル名とフロントマターの slug は一致させることを推奨します。
+- date フィールドは公開日時として利用されるため、タイムゾーンを明示するISO 8601形式を推奨します。
+- tags は空でも良いが、分類や検索のために設定することを推奨します。
