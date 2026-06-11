@@ -3248,13 +3248,11 @@ a {
     margin: -14px -14px 0;
   }
 
-  .article-meta {
-    grid-template-columns: 1fr;
-  }
-
   .article-back,
   .article time {
     min-height: 42px;
+    padding-inline: 10px;
+    white-space: nowrap;
   }
 
   .article h1 {

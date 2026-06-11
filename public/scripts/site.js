@@ -296,19 +296,35 @@ contactForm?.addEventListener("submit", (event) => {
 // =========================
 
 const COOKIE_KEY = "yunfie_cookie_consent";
+const GA_MEASUREMENT_ID = "G-678KKVFQ92";
 const cookieBanner = document.getElementById("cookieBanner");
 const cookieAccept = document.getElementById("cookieAccept");
 const cookieDeny = document.getElementById("cookieDeny");
 
 const enableAnalytics = () => {
-  if (typeof gtag === "function") {
-    gtag("consent", "update", { analytics_storage: "granted" });
-    gtag("event", "page_view");
+  if (typeof window.gtag === "function") {
+    window.gtag("consent", "update", { analytics_storage: "granted" });
+    window.gtag("config", GA_MEASUREMENT_ID, {
+      page_location: window.location.href,
+      page_path: window.location.pathname,
+      page_title: document.title
+    });
+  }
+};
+
+const disableAnalytics = () => {
+  if (typeof window.gtag === "function") {
+    window.gtag("consent", "update", { analytics_storage: "denied" });
   }
 };
 
 const applyConsent = (granted) => {
-  if (granted) enableAnalytics();
+  if (granted) {
+    enableAnalytics();
+    return;
+  }
+
+  disableAnalytics();
 };
 
 const hideBanner = () => {
@@ -358,5 +374,6 @@ cookieAccept?.addEventListener("click", () => {
 
 cookieDeny?.addEventListener("click", () => {
   localStorage.setItem(COOKIE_KEY, "denied");
+  applyConsent(false);
   hideBanner();
 });

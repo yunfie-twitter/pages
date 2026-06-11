@@ -1,6 +1,7 @@
 ---
 import CookieBanner from "../components/CookieBanner.astro";
 import Footer from "../components/Footer.astro";
+import GoogleHead from "../components/GoogleHead.astro";
 import Header from "../components/Header.astro";
 import Hero from "../components/Hero.astro";
 import Loader from "../components/Loader.astro";
@@ -147,19 +148,7 @@ const jsonLd = {
 
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 
-    <!-- Google tag (gtag.js) — 同意後のみ計測を開始 -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-678KKVFQ92"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() { dataLayer.push(arguments); }
-      gtag('js', new Date());
-      // デフォルトは拒否。同意後に update する
-      gtag('consent', 'default', {
-        analytics_storage: 'denied',
-        wait_for_update: 500,
-      });
-      gtag('config', 'G-678KKVFQ92', { send_page_view: false });
-    </script>
+    <GoogleHead />
 
     <script src={withBase("/scripts/site.js")} defer></script>
   </head>

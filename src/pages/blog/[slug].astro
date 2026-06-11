@@ -1,6 +1,7 @@
 ---
 import CookieBanner from "../../components/CookieBanner.astro";
 import Footer from "../../components/Footer.astro";
+import GoogleHead from "../../components/GoogleHead.astro";
 import Header from "../../components/Header.astro";
 import Loader from "../../components/Loader.astro";
 import { render } from "astro:content";
@@ -30,6 +31,7 @@ const { Content } = await render(post);
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{post.data.title} | yunfie</title>
     <meta name="description" content={post.data.description} />
+    <GoogleHead />
     <script src={withBase("/scripts/site.js")} defer></script>
   </head>
 
