@@ -3,6 +3,6 @@ import sitemap from "@astrojs/sitemap";
 
 export default defineConfig({
   site: "https://yunfie-twitter.github.io",
-  base: "homepage",
+  base: "pages",
   integrations: [sitemap()],
 });
