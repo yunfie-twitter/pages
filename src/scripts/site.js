@@ -1,4 +1,5 @@
 import Lenis from "lenis";
+import "lenis/dist/lenis.css";
 
 const menuButton = document.getElementById("menuButton");
 const navMenu = document.getElementById("navMenu");
@@ -18,10 +19,11 @@ const lenis = prefersReducedMotion
       duration: 1.05,
       easing: (time) => 1 - Math.pow(1 - time, 4),
       smoothWheel: true,
-      syncTouch: false
+      syncTouch: false,
+      autoRaf: true
     });
 
-if (lenis) {
+if (lenis && !lenis.options.autoRaf) {
   const raf = (time) => {
     lenis.raf(time);
     requestAnimationFrame(raf);

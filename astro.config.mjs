@@ -1,5 +1,6 @@
 import { defineConfig } from "astro/config";
 import { unified } from "@astrojs/markdown-remark";
+import { copyFile } from "node:fs/promises";
 import sitemap from "@astrojs/sitemap";
 import partytown from "@astrojs/partytown";
 import inline from "@playform/inline";
@@ -28,12 +29,27 @@ const lazyLoadMarkdownImages = () => {
   };
 };
 
+const sitemapXmlAlias = () => ({
+  name: "sitemap-xml-alias",
+  hooks: {
+    "astro:build:done": async ({ dir, logger }) => {
+      try {
+        await copyFile(new URL("sitemap-index.xml", dir), new URL("sitemap.xml", dir));
+        logger.info("`sitemap.xml` created as an alias of `sitemap-index.xml`.");
+      } catch (error) {
+        logger.warn(`Could not create \`sitemap.xml\`: ${error.message}`);
+      }
+    },
+  },
+});
+
 export default defineConfig({
   site: "https://yunfie-twitter.github.io",
   base: "/pages",
 
   integrations: [
     sitemap(),
+    sitemapXmlAlias(),
 
     partytown({
       config: {
