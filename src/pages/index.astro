@@ -6,12 +6,13 @@ import Hero from "../components/Hero.astro";
 import Loader from "../components/Loader.astro";
 import { formatPostDate, getBlogPosts, getPostHref } from "../data/posts";
 import { tracks, getYoutubeThumbnail, getYoutubeHref } from "../data/tracks";
+import { withBase } from "../utils/paths";
 import "../styles/global.css";
 
 const posts = await getBlogPosts();
-const siteUrl = Astro.site ?? new URL("https://example.com");
-const canonicalUrl = new URL("/", siteUrl).toString();
-const ogImageUrl = new URL("/ogp.png", siteUrl).toString();
+const siteUrl = Astro.site ?? new URL("https://yunfie-twitter.github.io");
+const canonicalUrl = new URL(withBase("/"), siteUrl).toString();
+const ogImageUrl = new URL(withBase("/ogp.png"), siteUrl).toString();
 
 const links = [
   {
@@ -160,7 +161,7 @@ const jsonLd = {
       gtag('config', 'G-678KKVFQ92', { send_page_view: false });
     </script>
 
-    <script src="/scripts/site.js" defer></script>
+    <script src={withBase("/scripts/site.js")} defer></script>
   </head>
 
   <body>
@@ -222,7 +223,7 @@ const jsonLd = {
           }
         </div>
 
-        <a class="news-all-link" href="/blog/" aria-label="すべての記事を見る">
+        <a class="news-all-link" href={withBase("/blog/")} aria-label="すべての記事を見る">
           すべての記事
         </a>
       </section>

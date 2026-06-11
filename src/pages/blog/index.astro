@@ -4,6 +4,7 @@ import Footer from "../../components/Footer.astro";
 import Header from "../../components/Header.astro";
 import Loader from "../../components/Loader.astro";
 import { formatPostDate, getBlogPosts, getPostHref } from "../../data/posts";
+import { withBase } from "../../utils/paths";
 import "../../styles/global.css";
 
 const posts = await getBlogPosts();
@@ -18,7 +19,7 @@ const latestDate = latestPost ? formatPostDate(latestPost.data.date) : "----.--.
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Blog | yunfie</title>
     <meta name="description" content="yunfieのブログです。" />
-    <script src="/scripts/site.js" defer></script>
+    <script src={withBase("/scripts/site.js")} defer></script>
   </head>
 
   <body>

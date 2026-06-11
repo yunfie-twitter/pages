@@ -1,4 +1,5 @@
 import { getCollection, type CollectionEntry } from "astro:content";
+import { withBase } from "../utils/paths";
 
 export type BlogPost = CollectionEntry<"blog">;
 
@@ -10,4 +11,4 @@ export const getBlogPosts = async () => {
 
 export const formatPostDate = (date: string) => date.replaceAll("-", ".");
 
-export const getPostHref = (slug: string) => `/blog/${slug}/`;
+export const getPostHref = (slug: string) => withBase(`/blog/${slug}/`);

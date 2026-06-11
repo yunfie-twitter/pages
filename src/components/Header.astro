@@ -1,20 +1,25 @@
 ---
+import { withBase } from "../utils/paths";
+
 const { homeHref = "#home" } = Astro.props;
+const normalizedHomeHref = homeHref.startsWith("/") ? withBase(homeHref) : homeHref;
+const rootHref = withBase("/");
+const sectionPrefix = normalizedHomeHref === "#home" ? "" : rootHref;
 
 const navItems = [
-  { href: `${homeHref}`, label: "TOP" },
-  { href: `${homeHref === "#home" ? "" : "/"}#about`, label: "ABOUT" },
-  { href: `${homeHref === "#home" ? "" : "/"}#news`, label: "NEWS" },
-  { href: `${homeHref === "#home" ? "" : "/"}#music`, label: "MUSIC" },
-  { href: `${homeHref === "#home" ? "" : "/"}#repository`, label: "REPOSITORY" },
-  { href: `${homeHref === "#home" ? "" : "/"}#links`, label: "LINKS" },
-  { href: `${homeHref === "#home" ? "" : "/"}#contact`, label: "CONTACT" }
+  { href: `${normalizedHomeHref}`, label: "TOP" },
+  { href: `${sectionPrefix}#about`, label: "ABOUT" },
+  { href: `${sectionPrefix}#news`, label: "NEWS" },
+  { href: `${sectionPrefix}#music`, label: "MUSIC" },
+  { href: `${sectionPrefix}#repository`, label: "REPOSITORY" },
+  { href: `${sectionPrefix}#links`, label: "LINKS" },
+  { href: `${sectionPrefix}#contact`, label: "CONTACT" }
 ];
 ---
 
 <header class="header">
   <div class="brand-lockup">
-    <a class="logo" href={homeHref} aria-label="トップページへ戻る">
+    <a class="logo" href={normalizedHomeHref} aria-label="トップページへ戻る">
       <span class="logo-mark" aria-hidden="true">@</span>
       <span class="logo-word">yunfie</span>
     </a>

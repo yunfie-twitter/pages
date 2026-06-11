@@ -1,18 +1,22 @@
+---
+import { withBase } from "../utils/paths";
+---
+
 <footer class="footer">
   <div class="footer-inner">
     <div class="footer-brand">
-      <a class="footer-logo" href="/">yunfie</a>
+      <a class="footer-logo" href={withBase("/")}>yunfie</a>
       <p>Official archive of web, music, notes, and tiny experiments.</p>
     </div>
 
     <nav class="footer-nav" aria-label="フッターナビゲーション">
-      <a href="/#about">ABOUT</a>
-      <a href="/#news">NEWS</a>
-      <a href="/#music">MUSIC</a>
-      <a href="/#repository">REPOSITORY</a>
-      <a href="/#links">LINKS</a>
-      <a href="/#contact">CONTACT</a>
-      <a href="/blog/">BLOG</a>
+      <a href={withBase("/#about")}>ABOUT</a>
+      <a href={withBase("/#news")}>NEWS</a>
+      <a href={withBase("/#music")}>MUSIC</a>
+      <a href={withBase("/#repository")}>REPOSITORY</a>
+      <a href={withBase("/#links")}>LINKS</a>
+      <a href={withBase("/#contact")}>CONTACT</a>
+      <a href={withBase("/blog/")}>BLOG</a>
     </nav>
 
     <div class="footer-bottom">
